@@ -179,7 +179,7 @@ const Hero = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 1 }}
         >
-          <p className="text-base md:text-2xl text-gray-400 font-light tracking-wide">
+          <p className="text-xl md:text-2xl text-gray-400 font-light tracking-wide">
             {personalInfo.role}.<br/>Solving complex problems with code.
           </p>
         </motion.div>

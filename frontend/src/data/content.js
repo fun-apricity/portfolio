@@ -119,31 +119,31 @@ export const projects = [
 export const codingProfiles = [
   {
     name: "LinkedIn",
-    url: "#",
+    url: "https://linkedin.com/in/abhay",
     icon: "FaLinkedin",
     color: "#0077B5",
   },
   {
     name: "GitHub",
-    url: "#",
+    url: "https://github.com/fun-apricity",
     icon: "FaGithub",
     color: "#ffffff",
   },
   {
     name: "LeetCode",
-    url: "#",
+    url: "https://leetcode.com/u/_apricity_/",
     icon: "SiLeetcode",
     color: "#FFA116",
   },
   {
     name: "Codeforces",
-    url: "#",
+    url: "https://codeforces.com/",
     icon: "SiCodeforces",
     color: "#1F8ACB",
   },
   {
     name: "HackerRank",
-    url: "#",
+    url: "https://hackerrank.com/",
     icon: "FaHackerrank",
     color: "#00EA64",
   },
