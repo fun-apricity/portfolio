@@ -19,6 +19,7 @@ portfolio/
 ## Features
 
 - Responsive one-page portfolio experience
+
 - Animated UI and motion-rich sections
 - Config-driven personal content
 - Contact form with server-side validation

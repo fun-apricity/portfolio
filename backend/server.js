@@ -11,18 +11,15 @@ const PORT = process.env.PORT || 5000;
    Middleware
    ═══════════════════════════════════════════════ */
 
-// CORS — allow frontend origin(s)
-const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
-  .split(",")
-  .map((o) => o.trim());
+// CORS — allowlist frontend origins
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://your-frontend.vercel.app",
+];
 
 app.use(
   cors({
-    origin: (origin, cb) => {
-      // Allow requests with no origin (curl, mobile apps, Render health checks)
-      if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-      cb(new Error("Not allowed by CORS"));
-    },
+    origin: allowedOrigins,
   })
 );
 
