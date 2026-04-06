@@ -45,6 +45,10 @@ const Hero = () => {
   
   const x = useMotionValue(0);
   const y = useMotionValue(0);
+  const heroParallaxX = useMotionValue(0);
+  const heroParallaxY = useMotionValue(0);
+  const heroParallaxSpringX = useSpring(heroParallaxX, { stiffness: 80, damping: 25, mass: 0.8 });
+  const heroParallaxSpringY = useSpring(heroParallaxY, { stiffness: 80, damping: 25, mass: 0.8 });
   const [isDragging, setIsDragging] = useState(false);
   const [coordX, setCoordX] = useState(0);
   const [coordY, setCoordY] = useState(0);
@@ -62,18 +66,22 @@ const Hero = () => {
   const { scrollYProgress } = useScroll();
   const parallaxY = useTransform(scrollYProgress, [0, 1], [0, 600]); // Moves down slowly as user scrolls down
 
-  // Subtle parallax on mouse move for hero text
-  const [mouseXY, setMouseXY] = useState({ x: 0, y: 0 });
+  // Use motion values here so pointer movement does not re-render the full hero.
   useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) {
+      return undefined;
+    }
+
     const handler = (e) => {
-      setMouseXY({
-        x: (e.clientX / window.innerWidth - 0.5) * 12,
-        y: (e.clientY / window.innerHeight - 0.5) * 8,
-      });
+      heroParallaxX.set((e.clientX / window.innerWidth - 0.5) * 12);
+      heroParallaxY.set((e.clientY / window.innerHeight - 0.5) * 8);
     };
+
     window.addEventListener("mousemove", handler);
-    return () => window.removeEventListener("mousemove", handler);
-  }, []);
+    return () => {
+      window.removeEventListener("mousemove", handler);
+    };
+  }, [heroParallaxX, heroParallaxY]);
 
   useMotionValueEvent(x, "change", (latest) => setCoordX(Math.round(latest)));
   useMotionValueEvent(y, "change", (latest) => setCoordY(Math.round(latest)));
@@ -106,10 +114,8 @@ const Hero = () => {
 
       {/* Subtle parallax hint layer — not touching stacking context */}
       <motion.div
-        animate={{ x: mouseXY.x * 0.3, y: mouseXY.y * 0.3 }}
-        transition={{ type: "spring", stiffness: 80, damping: 25 }}
         className="absolute inset-0 pointer-events-none"
-        style={{ zIndex: 1 }}
+        style={{ zIndex: 1, x: heroParallaxSpringX, y: heroParallaxSpringY }}
       />
 
       {/* Parallax Container */}

@@ -26,7 +26,7 @@ gsap.registerPlugin(ScrollTrigger);
 function App() {
   const [loading, setLoading] = useState(true);
   const lenisRef = useRef(null);
-  
+
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
@@ -48,18 +48,26 @@ function App() {
     lenisRef.current = lenis;
 
     // Sync Lenis with GSAP ScrollTrigger
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add((time) => {
+    const updateScrollTrigger = () => ScrollTrigger.update();
+    const updateLenis = (time) => {
       lenis.raf(time * 1000);
-    });
+    };
+
+    lenis.on('scroll', updateScrollTrigger);
+    gsap.ticker.add(updateLenis);
     gsap.ticker.lagSmoothing(0);
 
-    return () => lenis.destroy();
+    return () => {
+      lenis.off('scroll', updateScrollTrigger);
+      gsap.ticker.remove(updateLenis);
+      lenis.destroy();
+      lenisRef.current = null;
+    };
   }, [loading]);
 
   return (
     <CursorProvider>
-      <div className="relative bg-black min-h-screen cursor-fine-none">
+      <div className="ambient-shell relative min-h-screen cursor-fine-none">
         <CustomCursor />
         
         {/* Scroll Progress Indicator */}
