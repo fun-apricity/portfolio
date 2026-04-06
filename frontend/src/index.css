@@ -427,3 +427,12 @@ body {
     padding: 4rem 0;
   }
 }
+
+/* ═══════════════════════════════════════════════
+   CUSTOM UTILITIES
+   ═══════════════════════════════════════════════ */
+@media (pointer: fine) {
+  .cursor-fine-none {
+    cursor: none !important;
+  }
+}

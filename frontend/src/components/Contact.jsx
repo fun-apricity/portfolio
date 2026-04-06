@@ -30,7 +30,7 @@ function MagneticSubmit({ children, disabled }) {
       style={{ x: springX, y: springY, backgroundColor: 'var(--theme-accent)' }}
       whileHover={{ scale: 1.05, boxShadow: "0 0 30px var(--theme-accent)" }}
       whileTap={{ scale: 0.95 }}
-      className="self-start border border-white/20 text-black font-mono font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition-shadow duration-300 disabled:opacity-40 cursor-none glass"
+      className="self-start border border-white/20 text-black font-mono font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition-shadow duration-300 disabled:opacity-40 cursor-fine-none glass"
     >
       {children}
     </motion.button>

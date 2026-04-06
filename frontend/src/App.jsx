@@ -59,7 +59,7 @@ function App() {
 
   return (
     <CursorProvider>
-      <div className="relative bg-black min-h-screen cursor-none">
+      <div className="relative bg-black min-h-screen cursor-fine-none">
         <CustomCursor />
         
         {/* Scroll Progress Indicator */}

@@ -33,7 +33,7 @@ function MagneticButton({ children, href }) {
       style={{ x: springX, y: springY, backgroundColor: 'var(--theme-accent)' }}
       whileHover={{ scale: 1.05, boxShadow: "0 0 30px var(--theme-accent)" }}
       whileTap={{ scale: 0.95 }}
-      className="border border-white/20 text-black font-mono font-bold text-xs uppercase tracking-widest px-6 py-3 rounded-full inline-flex items-center gap-3 cursor-none transition-shadow duration-300 glass"
+      className="border border-white/20 text-black font-mono font-bold text-xs uppercase tracking-widest px-6 py-3 rounded-full inline-flex items-center gap-3 cursor-fine-none transition-shadow duration-300 glass"
     >
       <span className="text-lg">✦</span> {children}
     </motion.a>
@@ -48,6 +48,15 @@ const Hero = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [coordX, setCoordX] = useState(0);
   const [coordY, setCoordY] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const dragBound = windowWidth < 768 ? windowWidth * 0.2 : 200;
 
   // Scroll Parallax math
   const { scrollYProgress } = useScroll();
@@ -123,7 +132,7 @@ const Hero = () => {
             transition={{ duration: 0.8 }}
             style={{ x, y }}
             drag
-            dragConstraints={{ left: -200, right: 200, top: -200, bottom: 200 }}
+            dragConstraints={{ left: -dragBound, right: dragBound, top: -dragBound, bottom: dragBound }}
             dragElastic={0.4}
             dragSnapToOrigin={true}
             whileDrag={{ scale: 1.05, zIndex: 50 }}
@@ -137,7 +146,7 @@ const Hero = () => {
                 className="tracking-tighter selection:bg-transparent"
                 style={{
                   color: '#ffffff',
-                  fontSize: 'clamp(3.5rem, 15vw, 14rem)',
+                  fontSize: 'clamp(3rem, 12vw, 14rem)',
                   lineHeight: 1,
                   fontWeight: 900,
                   fontFamily: 'inherit',
@@ -149,7 +158,7 @@ const Hero = () => {
             <div className="flex justify-center w-full mt-[-2%] pointer-events-none relative" style={{ zIndex: -1 }}>
               <h1
                 className="text-massive-outline tracking-tighter selection:bg-transparent"
-                style={{ fontSize: 'clamp(3.5rem, 15vw, 14rem)', lineHeight: 1 }}
+                style={{ fontSize: 'clamp(3rem, 12vw, 14rem)', lineHeight: 1 }}
               >
                 <TextReveal text={lastName} delay={0.4} />
               </h1>
@@ -183,7 +192,7 @@ const Hero = () => {
         <MagneticButton href="#work">View Work</MagneticButton>
         <a
           href="#contact"
-          className="mono-label text-gray-500 hover:text-theme-accent transition-colors cursor-none"
+          className="mono-label text-gray-500 hover:text-theme-accent transition-colors cursor-fine-none"
           onMouseEnter={() => hoverEnter("CONTACT")}
           onMouseLeave={() => hoverLeave()}
         >

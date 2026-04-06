@@ -37,7 +37,7 @@ const Projects = () => {
   }, []);
 
   return (
-    <section id="work" ref={sectionRef} className="section-theme h-screen relative bg-transparent overflow-hidden flex flex-col justify-center" data-hue="320">
+    <section id="work" ref={sectionRef} className="section-theme min-h-screen md:h-screen relative bg-transparent md:overflow-hidden flex flex-col justify-center py-20 md:py-0" data-hue="320">
       
       <div className="absolute top-10 left-6 md:left-12 z-20 pointer-events-none">
         <span className="section-counter mb-2 block">03</span>
@@ -49,11 +49,11 @@ const Projects = () => {
         </div>
       </div>
 
-      <div ref={containerRef} className="flex gap-12 px-6 md:px-[10vw] mt-24 items-center justify-start w-max h-[70vh]">
+      <div ref={containerRef} className="flex flex-col md:flex-row gap-8 md:gap-12 px-6 md:px-[10vw] mt-32 md:mt-24 items-center justify-start w-full md:w-max h-auto md:h-[70vh]">
         {projects.map((project, i) => (
           <div 
             key={project.title} 
-            className="w-[85vw] md:w-[700px] h-full glass-card rounded-3xl p-6 lg:p-10 flex flex-col relative overflow-hidden group"
+            className="w-full md:w-[700px] h-[500px] md:h-full glass-card rounded-3xl p-6 lg:p-10 flex flex-col relative overflow-hidden group shrink-0"
           >
             {/* Project Fake Visual */}
             <div className="w-full h-1/2 md:h-3/5 bg-gray-950 rounded-2xl overflow-hidden relative border border-gray-800 flex items-center justify-center group-hover:border-gray-500 transition-colors">
