@@ -2,12 +2,12 @@ import { useEffect, useRef } from 'react';
 import { globalTheme } from '../utils/theme';
 
 /**
- * Topographic Elevation Flow
- * ———————————————————————————————
- * A high-performance 3D wireframe mesh that renders abstract flowing contours.
- * - Simulates Z-elevation using combined sine waves for organic "noise".
- * - Scrolling physically pushes the terrain past the camera.
- * - Reacts to globalTheme.hue from GSAP.
+ * Interactive Still Particle System
+ * ————————————————————————————————
+ * A field of particles that stays perfectly static until disturbed by mouse or touch.
+ * - Each particle has a "home" position it returns to.
+ * - Repels from the cursor or touch point.
+ * - Highly performant 2D canvas implementation.
  */
 const ParticleBackground = () => {
   const canvasRef = useRef(null);
@@ -17,147 +17,132 @@ const ParticleBackground = () => {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
+    let particles = [];
+    let mouse = { x: null, y: null, radius: 150 };
     let animId;
-    let time = 0;
-    
-    // Smooth scrolling velocity integration
-    let targetScrollY = window.scrollY;
-    let currentScrollY = window.scrollY;
-    let cameraZOffset = 0; // The virtual journey across the terrain
 
-    // Grid configuration
-    const cols = 50; 
-    const rows = 120; // Long terrain flowing towards us
-    const spacing = 60; // Distance between grid points
-    
-    const focalLength = 350;
+    const createParticles = () => {
+      particles = [];
+      const density = window.innerWidth < 768 ? 80 : 120; // Fewer particles on mobile for performance
+      const spacingX = window.innerWidth / (density * (window.innerWidth / window.innerHeight));
+      const spacingY = window.innerHeight / density;
 
-    // Mouse tilt
-    let targetYaw = 0, currentYaw = 0;
-    let targetPitch = 0, currentPitch = 0;
+      for (let y = 0; y < window.innerHeight; y += spacingY) {
+        for (let x = 0; x < window.innerWidth; x += spacingX) {
+          // Add some randomness to the initial grid to make it look "organic"
+          const baseX = x + (Math.random() - 0.5) * 10;
+          const baseY = y + (Math.random() - 0.5) * 10;
+          
+          particles.push({
+            x: baseX,
+            y: baseY,
+            baseX: baseX,
+            baseY: baseY,
+            size: Math.random() * 1.5 + 0.5,
+            density: (Math.random() * 30) + 1, // Determines weight/speed of return
+            vx: 0,
+            vy: 0
+          });
+        }
+      }
+    };
 
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      createParticles();
     };
+
+    const handleMouseMove = (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    };
+
+    const handleTouchMove = (e) => {
+      if (e.touches.length > 0) {
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+      }
+    };
+
+    const handleTouchEnd = () => {
+      mouse.x = null;
+      mouse.y = null;
+    };
+
     window.addEventListener('resize', resize);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd);
+
     resize();
 
-    const onScroll = () => { targetScrollY = window.scrollY; };
-    window.addEventListener('scroll', onScroll, { passive: true });
+    const animate = () => {
+      animId = requestAnimationFrame(animate);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const onMove = (e) => {
-      targetYaw = (e.clientX / window.innerWidth - 0.5) * 0.3; // Slight subtle pan
-      targetPitch = (e.clientY / window.innerHeight - 0.5) * 0.2; // Slight subtle tilt
-    };
-    window.addEventListener('mousemove', onMove);
-
-    // Fast pseudo-noise generator
-    const getZ = (x, y, t) => {
-      let z = 0;
-      z += Math.sin(x * 0.005 + t) * 80;
-      z += Math.cos(y * 0.008 - t * 0.8) * 60;
-      z += Math.sin((x + y) * 0.01 + t * 0.5) * 40;
-      return z;
-    };
-
-    const draw = () => {
-      animId = requestAnimationFrame(draw);
-      time += 0.008;
-
-      // Smooth camera interpolation
-      const dy = targetScrollY - currentScrollY;
-      currentScrollY += dy * 0.1;
-      
-      // Moving physically changes our forward position over the landscape
-      cameraZOffset += dy * 1.2;
-      cameraZOffset += 1.5; // Auto cruise forward
-
-      currentYaw += (targetYaw - currentYaw) * 0.05;
-      currentPitch += (targetPitch - currentPitch) * 0.05;
-
-      // Extract GSAP's global theme hue
       const globalHue = globalTheme.hue;
+      ctx.fillStyle = `hsla(${globalHue}, 80%, 70%, 0.4)`;
 
-      // Clear Canvas with ultra-faint trail for a smooth anti-aliased look
-      ctx.fillStyle = 'rgba(0, 0, 0, 1)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < particles.length; i++) {
+        let p = particles[i];
 
-      const cx = canvas.width / 2;
-      const cy = canvas.height / 2 + 100; // Shifted down so we look over the horizon
-
-      // Precalculate Euler Angles
-      const cosY = Math.cos(currentYaw);
-      const sinY = Math.sin(currentYaw);
-      const cosP = Math.cos(currentPitch - 0.3); // Base pitch looking slightly down
-      const sinP = Math.sin(currentPitch - 0.3);
-
-      ctx.lineWidth = 1.5;
-      ctx.globalCompositeOperation = 'lighter';
-
-      // We draw horizontally line-by-line starting from back to front
-      for (let y = rows; y >= 0; y--) {
-        ctx.beginPath();
-        let started = false;
-
-        for (let x = 0; x < cols; x++) {
-          // Calculate logical world coordinates
-          const worldX = (x - cols / 2) * spacing;
-          const worldY = y * spacing - cameraZOffset;
+        // Interaction logic
+        if (mouse.x !== null) {
+          let dx = mouse.x - p.x;
+          let dy = mouse.y - p.y;
+          let distance = Math.sqrt(dx * dx + dy * dy);
           
-          // Get organic elevation
-          const worldZ = getZ(worldX, worldY, time);
+          if (distance < mouse.radius) {
+            let forceDirectionX = dx / distance;
+            let forceDirectionY = dy / distance;
+            let maxDistance = mouse.radius;
+            let force = (maxDistance - distance) / maxDistance;
+            let directionX = forceDirectionX * force * p.density;
+            let directionY = forceDirectionY * force * p.density;
 
-          // Apply 3D camera Rotations (Yaw then Pitch)
-          // To make it look like a floor moving away, we map worldY to the Z depth axis
-          let relX = worldX;
-          let relZ = y * spacing; // Actual physical depth relative to camera
-          let relY = worldZ + 150; // Drop it heavily below us
-
-          // Rotate around Y axis (Yaw)
-          let rx = relX * cosY - relZ * sinY;
-          let rz = relZ * cosY + relX * sinY;
-          // Rotate around X axis (Pitch)
-          let ry = relY * cosP - rz * sinP;
-          let rz2 = rz * cosP + relY * sinP;
-
-          // Clip behind camera
-          if (rz2 < 10) {
-            started = false;
-            continue;
-          }
-
-          // Projection
-          const scale = focalLength / rz2;
-          const px = cx + rx * scale;
-          const py = cy + ry * scale;
-
-          if (!started) {
-            ctx.moveTo(px, py);
-            started = true;
-          } else {
-            ctx.lineTo(px, py);
+            p.vx -= directionX; // Repulsion
+            p.vy -= directionY;
           }
         }
 
-        // Draw the row line
-        const depthAlpha = Math.min(1, Math.max(0, 1 - (y / rows)));
-        if (depthAlpha > 0) {
-          ctx.strokeStyle = `hsla(${globalHue}, 100%, 65%, ${depthAlpha * 0.4})`;
-          ctx.stroke();
+        // Return force towards base position
+        let dxBase = p.baseX - p.x;
+        let dyBase = p.baseY - p.y;
+        p.vx += dxBase * 0.05;
+        p.vy += dyBase * 0.05;
+
+        // Apply friction
+        p.vx *= 0.9;
+        p.vy *= 0.9;
+
+        // Move particle
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Draw
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Add extreme subtle glow for larger particles
+        if (p.size > 1.2) {
+            ctx.shadowColor = `hsla(${globalHue}, 80%, 70%, 0.2)`;
+            ctx.shadowBlur = 4;
+        } else {
+            ctx.shadowBlur = 0;
         }
       }
-
-      ctx.globalCompositeOperation = 'source-over';
     };
 
-    draw();
+    animate();
 
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', resize);
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
     };
   }, []);
 
@@ -165,7 +150,7 @@ const ParticleBackground = () => {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none"
-      style={{ zIndex: 0 }}
+      style={{ zIndex: 0, background: 'black' }}
     />
   );
 };

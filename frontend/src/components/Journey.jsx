@@ -2,10 +2,10 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 
 const milestones = [
-  { year: "2021", label: "Started coding", detail: "Began with C++ and competitive programming. Solved first 100 problems on LeetCode." },
-  { year: "2022", label: "Entered web dev", detail: "Discovered React. Built first full-stack MERN app. Fell in love with frontend animation." },
-  { year: "2023", label: "Went deep", detail: "Explored WebGL, Three.js, and system design. Started contributing to open source." },
-  { year: "2024", label: "Current", detail: "Building Alumnet. Exploring AI integrations. Targeting a top engineering role." },
+  { year: "2023", label: "Started coding", detail: "Began with JavaScript and modern web frameworks. Mastered the fundamentals of the MERN stack." },
+  { year: "2023", label: "Specialization", detail: "Focused on frontend animations and immersive design. Explored WebGL and Three.js." },
+  { year: "2024", label: "Deep Dive", detail: "Contributing to open source and building high-performance applications. AI integration focus." },
+  { year: "PRESENT", label: "Scaling Up", detail: "Targeting top engineering opportunities and building Alumnet." },
 ];
 
 export default function Journey() {
