@@ -49,16 +49,16 @@ PORT=5000
 EMAIL_USER=your.email@gmail.com
 EMAIL_PASS=your-gmail-app-password
 EMAIL_TO=your.email@gmail.com
-FRONTEND_URL=http://localhost:5173
+FRONTEND_URL=https://portfolio-nine-xi-5qpg1kbrxq.vercel.app
 ```
 
 Optional frontend environment (`frontend/.env`):
 
 ```env
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=https://portfolio-ylsl.onrender.com/api
 ```
 
-If `VITE_API_URL` is not set, the frontend defaults to `http://localhost:5000/api`.
+If `VITE_API_URL` is not set, the frontend defaults to `https://portfolio-ylsl.onrender.com/api`.
 
 ### 3) Run in Development
 
@@ -78,8 +78,8 @@ npm run dev
 
 App URLs:
 
-- Frontend: `http://localhost:5173`
-- Backend: `http://localhost:5000`
+- Frontend: `https://portfolio-nine-xi-5qpg1kbrxq.vercel.app`
+- Backend: `https://portfolio-ylsl.onrender.com`
 
 ## API Reference
 

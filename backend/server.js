@@ -11,15 +11,12 @@ const PORT = process.env.PORT || 5000;
    Middleware
    ═══════════════════════════════════════════════ */
 
-// CORS — allowlist frontend origins
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://your-frontend.vercel.app",
-];
-
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: [
+      "http://localhost:5173",
+      "https://portfolio-nine-xi-5qpg1kbrxq.vercel.app",
+    ],
   })
 );
 
@@ -235,6 +232,5 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
    Start
    ═══════════════════════════════════════════════ */
 app.listen(PORT, () => {
-  console.log(`\n🚀 Backend running on http://localhost:${PORT}`);
-  console.log(`   Allowed origins: ${allowedOrigins.join(", ")}\n`);
+  console.log(`\nBackend running on port ${PORT}\n`);
 });

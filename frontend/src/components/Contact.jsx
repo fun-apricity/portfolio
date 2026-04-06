@@ -2,7 +2,7 @@ import { motion, useMotionValue, useSpring } from "framer-motion";
 import { useState, useRef } from "react";
 import { personalInfo } from "../data/content";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "https://portfolio-ylsl.onrender.com/api";
 
 // Magnetic button
 function MagneticSubmit({ children, disabled }) {
