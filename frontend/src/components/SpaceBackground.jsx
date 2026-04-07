@@ -1,128 +1,122 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Stars } from '@react-three/drei';
+import { Stars, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 
-// Constants for the journey
-const PLANET_COUNT = 8;
-const Z_DEPTH = -180; // Total deep space travel distance
+const PLANET_COUNT = 7;
+const Y_DEPTH = -40; // Camera travels down along Y axis through the sections
 
 /**
- * Super smooth, highly optimized geometric Planet.
- * Uses math and native Three JS materials to look stunning without heavy textures.
+ * Photorealistic Planet component.
+ * Uses high-res maps from three.js CDN to generate realistic procedural-looking worlds via color tinting.
  */
-const Planet = ({ position, color, hasRing, scale, speed }) => {
+const RealisticPlanet = ({ id, color, isMoon, scale, speed }) => {
   const meshRef = useRef();
-  const ringRef = useRef();
 
-  useFrame((state, delta) => {
-    // Constant 360-degree rotation
-    meshRef.current.rotation.y += delta * speed;
-    if (ringRef.current) {
-      ringRef.current.rotation.z -= delta * speed * 0.4;
-      ringRef.current.rotation.x += delta * speed * 0.1;
-    }
+  // Load realistic textures (suspended automatically by R3F Suspense)
+  const textures = useTexture([
+    'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg',
+    'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/moon_1024.jpg'
+  ]);
+  const map = isMoon ? textures[1] : textures[0];
+
+  const baseY = (id / (PLANET_COUNT - 1)) * Y_DEPTH;
+  const isEven = id % 2 === 0;
+
+  useFrame(() => {
+    // 1. Continuous Rotation
+    meshRef.current.rotation.y += 0.002 * speed;
+    
+    // 2. Parallax sliding effect based strictly on scroll
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    const scrollProgress = scrollTop / maxScroll;
+    
+    const cameraY = scrollProgress * Y_DEPTH;
+    
+    // Difference between camera and this planet
+    // Positive when approaching, 0 when aligned, Negative when leaving
+    const diff = cameraY - baseY;
+    
+    // Fly across the X-axis mapping the scroll distance
+    const xMovement = diff * 1.8; 
+    
+    // Alternate direction: left-to-right, then right-to-left
+    const currentX = isEven ? xMovement : -xMovement;
+
+    // Apply smooth positions and keep the original Y base
+    meshRef.current.position.set(currentX, baseY, 0);
   });
 
   return (
-    <group position={position}>
-      <mesh ref={meshRef}>
-        {/* Icosahedron with detail 16 creates a perfect, highly optimized sphere */}
-        <icosahedronGeometry args={[scale, 16]} />
-        <meshStandardMaterial 
-          color={color} 
-          roughness={0.15} 
-          metalness={0.8} 
-        />
-      </mesh>
-      
-      {/* Optional elegant sci-fi ring */}
-      {hasRing && (
-        <mesh ref={ringRef} rotation={[Math.PI / 2.5, 0, 0]}>
-          <torusGeometry args={[scale * 1.6, 0.015, 16, 100]} />
-          <meshBasicMaterial color={color} transparent opacity={0.4} />
-        </mesh>
-      )}
-      
-      {/* Subtle atmospheric glow effect (additive blending) */}
-      <mesh scale={1.05}>
-         <sphereGeometry args={[scale, 32, 32]} />
-         <meshBasicMaterial 
-           color={color} 
-           transparent 
-           opacity={0.06} 
-           blending={THREE.AdditiveBlending} 
-           depthWrite={false} 
-         />
-      </mesh>
-    </group>
+    <mesh ref={meshRef}>
+      <sphereGeometry args={[scale, 64, 64]} />
+      {/* We color-tint the maps to make unique looking "real" alternative exoplanets */}
+      <meshStandardMaterial 
+        map={map}
+        color={color} 
+        roughness={isMoon ? 0.8 : 0.4}
+        metalness={0.1}
+      />
+    </mesh>
   );
 };
 
-/**
- * FlightController links the native window scroll to the WebGL Camera.
- * It smoothly flies the camera through space and brings a light source with it.
- */
 const FlightController = () => {
   const { camera } = useThree();
   const lightRef = useRef();
 
   useFrame(() => {
-    // Capture user's native scroll progress across the document
     const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    const scrollProgress = maxScroll > 0 ? scrollTop / maxScroll : 0;
+    const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    const scrollProgress = scrollTop / maxScroll;
     
-    // Linear target Z calculation based on scroll
-    const targetZ = scrollProgress * Z_DEPTH;
-
-    // Smooth inertia camera interpolation (butter-smooth effect)
-    camera.position.z += (targetZ - camera.position.z) * 0.08;
-
-    // Adds a very subtle side-to-side drift so the flight isn't totally perfectly straight
-    const driftX = Math.sin(scrollProgress * Math.PI * 4) * 2;
-    const driftY = Math.cos(scrollProgress * Math.PI * 6) * 0.5;
+    // Camera exclusively traverses vertically down
+    const targetY = scrollProgress * Y_DEPTH;
     
-    camera.position.x += ((driftX) - camera.position.x) * 0.05;
-    camera.position.y += ((driftY) - camera.position.y) * 0.05;
+    camera.position.y += (targetY - camera.position.y) * 0.1;
+    camera.position.x = 0;
+    camera.position.z = 8; // Fixed distant viewing to see planets cross the screen
+    
+    camera.lookAt(0, camera.position.y, 0);
 
-    // Keep camera staring forward into the dark beyond
-    camera.lookAt(0, 0, camera.position.z - 50);
-
-    // Dynamic light travels exactly with the camera to illuminate planets as you approach
+    // Spotlight follows the camera pointing down to illuminate the currently viewed planet brilliantly
     if (lightRef.current) {
-        lightRef.current.position.set(camera.position.x, camera.position.y + 1, camera.position.z + 2);
+        lightRef.current.position.set(0, camera.position.y + 2, 6);
     }
   });
 
-  return <pointLight ref={lightRef} intensity={3} color="#ffffff" distance={40} decay={2} />;
+  return (
+    <>
+      <pointLight ref={lightRef} intensity={4} color="#ffffff" distance={20} decay={2} />
+      {/* Subtle ambient light so the dark side of planets aren't pitch black */}
+      <ambientLight intensity={0.05} />
+    </>
+  );
 };
 
 const SpaceBackground = () => {
-  // Pre-generate the 3D data cleanly once so we don't recalculate on re-renders
+  // Pre-generate the planetary variations
   const planets = useMemo(() => {
     const data = [];
-    // A premium set of vivid theme colors
-    const colors = ['#ffffff', '#00e5ff', '#ff22aa', '#aaff00', '#aaaaaa', '#ffaa00', '#5555ff', '#ff3333'];
+    // Tint realistic textures to create diverse looking planets
+    const colors = [
+      '#ffffff', // Earth-like
+      '#ffcc88', // Venus-like/Desert
+      '#ff5555', // Mars-like
+      '#88ffcc', // Ice giant
+      '#aa88ff', // Alien gas
+      '#ffffff', // Moon
+      '#ffaa55'  // Jupiter-like
+    ];
     
     for (let i = 0; i < PLANET_COUNT; i++) {
-        // Space planets beautifully across the Z-axis
-        const zPos = (i / (PLANET_COUNT - 1)) * Z_DEPTH - 10; 
-        
-        // Alternate planets strictly on the Left / Right so the camera safely flies *between* them
-        const xSide = i % 2 === 0 ? 1 : -1;
-        const xPos = xSide * (3 + Math.random() * 2);
-        
-        // Slight height variance
-        const yPos = (Math.random() - 0.5) * 4;
-        
         data.push({
             id: i,
-            position: [xPos, yPos, zPos],
             color: colors[i % colors.length],
-            hasRing: Math.random() > 0.4, // 60% chance to have rings
-            scale: 1 + Math.random() * 1.5,
-            speed: (Math.random() * 0.6 + 0.2) * (i % 2 === 0 ? 1 : -1),
+            isMoon: i === 5, // Make one of them definitively a moon
+            scale: 2 + Math.random() * 1.5, // Large planets for realism
+            speed: (Math.random() * 1.5 + 0.5) * (i % 2 === 0 ? 1 : -1),
         });
     }
     return data;
@@ -131,22 +125,19 @@ const SpaceBackground = () => {
   return (
     <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, background: '#020202' }}>
       <Canvas
-        camera={{ position: [0, 0, 5], fov: 60 }}
-        // Optimization: Reduce pixel ratio on high-DPI screens (especially phones) to guarantee extreme smoothness 
-        dpr={[1, 1.5]} 
-        // Optimization: Disable expensive WebGL antialiasing, favor raw performance
+        camera={{ position: [0, 0, 8], fov: 60 }}
+        dpr={[1, 1.5]}
         gl={{ antialias: false, powerPreference: 'high-performance' }}
       >
-        <ambientLight intensity={0.15} />
+        <FlightController />
         
-        {/* Soft global directional moonlight */}
-        <directionalLight position={[10, 10, 10]} intensity={0.5} color="#abcdef" />
-        
-        {planets.map((planet) => (
-          <Planet key={planet.id} {...planet} />
-        ))}
+        {/* React Suspense handles texture map loading transparently */}
+        <Suspense fallback={null}>
+          {planets.map((planet) => (
+            <RealisticPlanet key={planet.id} {...planet} />
+          ))}
+        </Suspense>
 
-        {/* Lightweight procedural stars mesh */}
         <Stars 
           radius={50} 
           depth={50} 
@@ -156,8 +147,6 @@ const SpaceBackground = () => {
           fade 
           speed={0.5} 
         />
-        
-        <FlightController />
       </Canvas>
     </div>
   );
