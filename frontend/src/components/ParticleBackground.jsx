@@ -2,12 +2,8 @@ import { useEffect, useRef } from 'react';
 import { globalTheme } from '../utils/theme';
 
 /**
- * Interactive Still Particle System
- * ————————————————————————————————
- * A field of particles that stays perfectly static until disturbed by mouse or touch.
- * - Each particle has a "home" position it returns to.
- * - Repels from the cursor or touch point.
- * - Highly performant 2D canvas implementation.
+ * Premium Liquid Aurora / Gradient Mesh Background
+ * Drops the particle concept entirely for huge, smooth, cinematic glowing orbs that drift and react to the cursor.
  */
 const ParticleBackground = () => {
   const canvasRef = useRef(null);
@@ -16,123 +12,119 @@ const ParticleBackground = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-
-    let particles = [];
-    let mouse = { x: null, y: null, radius: 150 };
+    
     let animId;
-
-    const createParticles = () => {
-      particles = [];
-      const density = window.innerWidth < 768 ? 80 : 120; // Fewer particles on mobile for performance
-      const spacingX = window.innerWidth / (density * (window.innerWidth / window.innerHeight));
-      const spacingY = window.innerHeight / density;
-
-      for (let y = 0; y < window.innerHeight; y += spacingY) {
-        for (let x = 0; x < window.innerWidth; x += spacingX) {
-          // Add some randomness to the initial grid to make it look "organic"
-          const baseX = x + (Math.random() - 0.5) * 10;
-          const baseY = y + (Math.random() - 0.5) * 10;
-          
-          particles.push({
-            x: baseX,
-            y: baseY,
-            baseX: baseX,
-            baseY: baseY,
-            size: Math.random() * 1.5 + 0.5,
-            density: (Math.random() * 30) + 1, // Determines weight/speed of return
-            vx: 0,
-            vy: 0
-          });
-        }
-      }
+    let time = 0;
+    
+    // Track cursor for interaction
+    let mouse = { 
+      x: window.innerWidth / 2, 
+      y: window.innerHeight / 2, 
+      targetX: window.innerWidth / 2, 
+      targetY: window.innerHeight / 2 
     };
 
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      createParticles();
     };
 
     const handleMouseMove = (e) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
+      mouse.targetX = e.clientX;
+      mouse.targetY = e.clientY;
     };
 
     const handleTouchMove = (e) => {
       if (e.touches.length > 0) {
-        mouse.x = e.touches[0].clientX;
-        mouse.y = e.touches[0].clientY;
+        mouse.targetX = e.touches[0].clientX;
+        mouse.targetY = e.touches[0].clientY;
       }
-    };
-
-    const handleTouchEnd = () => {
-      mouse.x = null;
-      mouse.y = null;
     };
 
     window.addEventListener('resize', resize);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('touchmove', handleTouchMove, { passive: true });
-    window.addEventListener('touchend', handleTouchEnd);
 
     resize();
 
+    // Define 4 giant floating light sources
+    const orbs = [
+      { speedR: 0.005, speedX: 0.002, speedY: 0.0015, phase: 0, size: 0.7 },
+      { speedR: -0.006, speedX: 0.0015, speedY: 0.002, phase: 2, size: 0.8 },
+      { speedR: 0.004, speedX: -0.001, speedY: -0.0012, phase: 4, size: 0.6 },
+      { speedR: -0.003, speedX: -0.0018, speedY: 0.001, phase: 1, size: 0.9 },
+    ];
+
     const animate = () => {
       animId = requestAnimationFrame(animate);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      time += 1;
+      
+      // Buttery smooth cursor tracking
+      mouse.x += (mouse.targetX - mouse.x) * 0.06;
+      mouse.y += (mouse.targetY - mouse.y) * 0.06;
 
-      const globalHue = globalTheme.hue;
-      ctx.fillStyle = `hsla(${globalHue}, 80%, 70%, 0.4)`;
+      const width = canvas.width;
+      const height = canvas.height;
+      const minDim = Math.min(width, height);
+      
+      // Clear with an elegant, almost-black atmospheric color
+      ctx.fillStyle = '#050505';
+      ctx.fillRect(0, 0, width, height);
 
-      for (let i = 0; i < particles.length; i++) {
-        let p = particles[i];
+      // 'screen' mode creates beautiful color blending where lights overlap
+      ctx.globalCompositeOperation = 'screen';
 
-        // Interaction logic
-        if (mouse.x !== null) {
-          let dx = mouse.x - p.x;
-          let dy = mouse.y - p.y;
-          let distance = Math.sqrt(dx * dx + dy * dy);
-          
-          if (distance < mouse.radius) {
-            let forceDirectionX = dx / distance;
-            let forceDirectionY = dy / distance;
-            let maxDistance = mouse.radius;
-            let force = (maxDistance - distance) / maxDistance;
-            let directionX = forceDirectionX * force * p.density;
-            let directionY = forceDirectionY * force * p.density;
+      const hue = globalTheme.hue;
 
-            p.vx -= directionX; // Repulsion
-            p.vy -= directionY;
-          }
-        }
-
-        // Return force towards base position
-        let dxBase = p.baseX - p.x;
-        let dyBase = p.baseY - p.y;
-        p.vx += dxBase * 0.05;
-        p.vy += dyBase * 0.05;
-
-        // Apply friction
-        p.vx *= 0.9;
-        p.vy *= 0.9;
-
-        // Move particle
-        p.x += p.vx;
-        p.y += p.vy;
-
-        // Draw
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
+      // Draw floating background orbs
+      orbs.forEach((orb, i) => {
+        // Organic, continuous wandering using sine waves
+        const xPos = width * 0.5 + Math.sin(time * orb.speedX + orb.phase) * width * 0.35;
+        const yPos = height * 0.5 + Math.cos(time * orb.speedY + orb.phase) * height * 0.35;
         
-        // Add extreme subtle glow for larger particles
-        if (p.size > 1.2) {
-            ctx.shadowColor = `hsla(${globalHue}, 80%, 70%, 0.2)`;
-            ctx.shadowBlur = 4;
-        } else {
-            ctx.shadowBlur = 0;
-        }
-      }
+        // Mouse reactivity: orbs subtly shift when cursor moves near them
+        const dx = mouse.x - xPos;
+        const dy = mouse.y - yPos;
+        const distSq = dx * dx + dy * dy;
+        // Some orbs pull slightly, some push slightly
+        const influence = (i % 2 === 0 ? 1 : -0.5) * Math.min(1, 150000 / (distSq + 5000));
+        
+        const adjustedX = xPos - dx * influence * 0.15;
+        const adjustedY = yPos - dy * influence * 0.15;
+
+        // Slowly breathing radius effect
+        const radius = minDim * orb.size + Math.sin(time * orb.speedR) * (minDim * 0.15);
+
+        const gradient = ctx.createRadialGradient(adjustedX, adjustedY, 0, adjustedX, adjustedY, radius);
+        
+        // Shift hues slightly for depth
+        const orbHue = (hue + i * 20) % 360;
+        
+        gradient.addColorStop(0, `hsla(${orbHue}, 80%, 45%, 0.12)`);
+        gradient.addColorStop(0.5, `hsla(${orbHue}, 80%, 35%, 0.04)`);
+        gradient.addColorStop(1, 'transparent');
+
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(adjustedX, adjustedY, radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // The dynamic cursor glow spotlight
+      ctx.globalCompositeOperation = 'lighter';
+      const cursorRadius = minDim * 0.5; // Big soft follow
+      const cursorGradient = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, cursorRadius);
+      cursorGradient.addColorStop(0, `hsla(${hue}, 90%, 60%, 0.1)`);
+      cursorGradient.addColorStop(0.5, `hsla(${hue}, 90%, 50%, 0.03)`);
+      cursorGradient.addColorStop(1, 'transparent');
+      
+      ctx.fillStyle = cursorGradient;
+      ctx.beginPath();
+      ctx.arc(mouse.x, mouse.y, cursorRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Reset composition to avoid messing with other layer drawing if added later
+      ctx.globalCompositeOperation = 'source-over';
     };
 
     animate();
@@ -142,7 +134,6 @@ const ParticleBackground = () => {
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleTouchEnd);
     };
   }, []);
 
@@ -150,7 +141,7 @@ const ParticleBackground = () => {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none"
-      style={{ zIndex: 0, background: 'black' }}
+      style={{ zIndex: 0, background: '#050505' }}
     />
   );
 };
