@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
 /* ─── Context & Utils ───────────────────────── */
 import { CursorProvider } from "./context/CursorContext";
 import CustomCursor from "./components/CustomCursor";
-import ParticleBackground from "./components/ParticleBackground";
+import SpaceBackground from "./components/SpaceBackground";
 
 /* ─── Components ─────────────────────────────── */
 import Loader from "./components/Loader";
@@ -69,7 +69,7 @@ function App() {
         />
 
         {/* Main animated background */}
-        <ParticleBackground />
+        <SpaceBackground />
 
         {/* Loading screen */}
         <AnimatePresence mode="wait">
