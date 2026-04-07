@@ -2,8 +2,8 @@ import { useEffect, useRef } from 'react';
 import { globalTheme } from '../utils/theme';
 
 /**
- * Premium Liquid Aurora / Gradient Mesh Background
- * Drops the particle concept entirely for huge, smooth, cinematic glowing orbs that drift and react to the cursor.
+ * Antigravity Physics Orb Background
+ * A singular premium glowing sphere that floats freely and violently repels from your cursor.
  */
 const ParticleBackground = () => {
   const canvasRef = useRef(null);
@@ -14,30 +14,41 @@ const ParticleBackground = () => {
     const ctx = canvas.getContext('2d');
     
     let animId;
-    let time = 0;
-    
-    // Track cursor for interaction
-    let mouse = { 
-      x: window.innerWidth / 2, 
-      y: window.innerHeight / 2, 
-      targetX: window.innerWidth / 2, 
-      targetY: window.innerHeight / 2 
+    let mouse = { x: -1000, y: -1000, vx: 0, vy: 0 };
+    let lastMouse = { x: -1000, y: -1000 };
+
+    // Define the physics entity: our floating circle ball
+    let ball = {
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+        vx: 0,
+        vy: 0,
+        radius: window.innerWidth < 768 ? 100 : 160, // Elegant large radius
     };
 
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      ball.radius = window.innerWidth < 768 ? 100 : 160;
     };
 
     const handleMouseMove = (e) => {
-      mouse.targetX = e.clientX;
-      mouse.targetY = e.clientY;
+      lastMouse.x = mouse.x;
+      lastMouse.y = mouse.y;
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      mouse.vx = mouse.x - lastMouse.x;
+      mouse.vy = mouse.y - lastMouse.y;
     };
 
     const handleTouchMove = (e) => {
       if (e.touches.length > 0) {
-        mouse.targetX = e.touches[0].clientX;
-        mouse.targetY = e.touches[0].clientY;
+        lastMouse.x = mouse.x;
+        lastMouse.y = mouse.y;
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+        mouse.vx = mouse.x - lastMouse.x;
+        mouse.vy = mouse.y - lastMouse.y;
       }
     };
 
@@ -47,84 +58,108 @@ const ParticleBackground = () => {
 
     resize();
 
-    // Define 4 giant floating light sources
-    const orbs = [
-      { speedR: 0.005, speedX: 0.002, speedY: 0.0015, phase: 0, size: 0.7 },
-      { speedR: -0.006, speedX: 0.0015, speedY: 0.002, phase: 2, size: 0.8 },
-      { speedR: 0.004, speedX: -0.001, speedY: -0.0012, phase: 4, size: 0.6 },
-      { speedR: -0.003, speedX: -0.0018, speedY: 0.001, phase: 1, size: 0.9 },
-    ];
-
     const animate = () => {
       animId = requestAnimationFrame(animate);
-      time += 1;
       
-      // Buttery smooth cursor tracking
-      mouse.x += (mouse.targetX - mouse.x) * 0.06;
-      mouse.y += (mouse.targetY - mouse.y) * 0.06;
-
-      const width = canvas.width;
-      const height = canvas.height;
-      const minDim = Math.min(width, height);
-      
-      // Clear with an elegant, almost-black atmospheric color
+      // Extremely dark architectural background
       ctx.fillStyle = '#050505';
-      ctx.fillRect(0, 0, width, height);
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 'screen' mode creates beautiful color blending where lights overlap
-      ctx.globalCompositeOperation = 'screen';
+      // --- PHYSICS UPDATE ---
+      
+      // 1. Friction / Drag (simulates air resistance)
+      ball.vx *= 0.94;
+      ball.vy *= 0.94;
 
+      // 2. Autonomous drifting in zero gravity
+      ball.vx += (Math.random() - 0.5) * 0.3;
+      ball.vy += (Math.random() - 0.5) * 0.3;
+
+      // 3. Mouse Antigravity Repulsion Effect
+      const dx = ball.x - mouse.x;
+      const dy = ball.y - mouse.y;
+      const distSq = dx * dx + dy * dy;
+      
+      // The safe zone before the cursor pushes it away
+      const repelRadius = window.innerWidth < 768 ? 200 : 350; 
+      
+      if (distSq < repelRadius * repelRadius) {
+          const dist = Math.sqrt(distSq);
+          
+          // Proportional force: stronger as the cursor gets closer
+          const force = (repelRadius - dist) / repelRadius;
+          
+          // Apply outward antigravity force
+          ball.vx += (dx / dist) * force * 1.5;
+          ball.vy += (dy / dist) * force * 1.5;
+          
+          // Add swiping force from fast mouse movement to allow users to "slap" the ball
+          ball.vx += mouse.vx * force * 0.04;
+          ball.vy += mouse.vy * force * 0.04;
+      }
+
+      // 4. Soft Edge Constraint Force (Elastic wall bounce)
+      const pad = ball.radius;
+      if (ball.x < pad) { ball.vx += 1.5; }
+      if (ball.x > canvas.width - pad) { ball.vx -= 1.5; }
+      if (ball.y < pad) { ball.vy += 1.5; }
+      if (ball.y > canvas.height - pad) { ball.vy -= 1.5; }
+
+      // Update true position
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+
+      // Decay mouse velocity so it doesn't perpetually apply force
+      mouse.vx *= 0.8;
+      mouse.vy *= 0.8;
+
+      // --- RENDERING ---
       const hue = globalTheme.hue;
 
-      // Draw floating background orbs
-      orbs.forEach((orb, i) => {
-        // Organic, continuous wandering using sine waves
-        const xPos = width * 0.5 + Math.sin(time * orb.speedX + orb.phase) * width * 0.35;
-        const yPos = height * 0.5 + Math.cos(time * orb.speedY + orb.phase) * height * 0.35;
-        
-        // Mouse reactivity: orbs subtly shift when cursor moves near them
-        const dx = mouse.x - xPos;
-        const dy = mouse.y - yPos;
-        const distSq = dx * dx + dy * dy;
-        // Some orbs pull slightly, some push slightly
-        const influence = (i % 2 === 0 ? 1 : -0.5) * Math.min(1, 150000 / (distSq + 5000));
-        
-        const adjustedX = xPos - dx * influence * 0.15;
-        const adjustedY = yPos - dy * influence * 0.15;
-
-        // Slowly breathing radius effect
-        const radius = minDim * orb.size + Math.sin(time * orb.speedR) * (minDim * 0.15);
-
-        const gradient = ctx.createRadialGradient(adjustedX, adjustedY, 0, adjustedX, adjustedY, radius);
-        
-        // Shift hues slightly for depth
-        const orbHue = (hue + i * 20) % 360;
-        
-        gradient.addColorStop(0, `hsla(${orbHue}, 80%, 45%, 0.12)`);
-        gradient.addColorStop(0.5, `hsla(${orbHue}, 80%, 35%, 0.04)`);
-        gradient.addColorStop(1, 'transparent');
-
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(adjustedX, adjustedY, radius, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      // The dynamic cursor glow spotlight
-      ctx.globalCompositeOperation = 'lighter';
-      const cursorRadius = minDim * 0.5; // Big soft follow
-      const cursorGradient = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, cursorRadius);
-      cursorGradient.addColorStop(0, `hsla(${hue}, 90%, 60%, 0.1)`);
-      cursorGradient.addColorStop(0.5, `hsla(${hue}, 90%, 50%, 0.03)`);
-      cursorGradient.addColorStop(1, 'transparent');
+      ctx.save();
       
-      ctx.fillStyle = cursorGradient;
+      // Translate to ball position to apply dynamic transformations
+      ctx.translate(ball.x, ball.y);
+      
+      // Calculate squash and stretch relative to physics speed
+      const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+      const angle = Math.atan2(ball.vy, ball.vx);
+      
+      // Max stretch limit to keep it structurally rigid but fluid
+      const stretch = Math.min(1.4, 1 + speed * 0.015);
+      const squash = Math.max(0.7, 1 - speed * 0.015);
+      
+      ctx.rotate(angle);
+      ctx.scale(stretch, squash);
+      
+      // 1. Draw glowing radiant aura
+      ctx.globalCompositeOperation = 'screen';
+      const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, ball.radius);
+      gradient.addColorStop(0, `hsla(${hue}, 80%, 65%, 0.4)`);
+      gradient.addColorStop(0.3, `hsla(${hue}, 80%, 40%, 0.15)`);
+      gradient.addColorStop(1, `transparent`);
+      
+      ctx.fillStyle = gradient;
       ctx.beginPath();
-      ctx.arc(mouse.x, mouse.y, cursorRadius, 0, Math.PI * 2);
+      ctx.arc(0, 0, ball.radius, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.globalCompositeOperation = 'source-over';
+
+      // 2. Draw defined geometric inner ring for structural framing
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = `hsla(${hue}, 60%, 50%, 0.6)`;
+      ctx.beginPath();
+      ctx.arc(0, 0, ball.radius * 0.6, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 3. Draw a tiny solid core for weight
+      ctx.fillStyle = `hsla(${hue}, 80%, 70%, 0.8)`;
+      ctx.beginPath();
+      ctx.arc(0, 0, 3, 0, Math.PI * 2);
       ctx.fill();
 
-      // Reset composition to avoid messing with other layer drawing if added later
-      ctx.globalCompositeOperation = 'source-over';
+      ctx.restore();
     };
 
     animate();
