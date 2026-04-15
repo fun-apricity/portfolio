@@ -5,7 +5,7 @@
 /* ═══════════════════════════════════════════════
    DESIGN SYSTEM — Pure Black Editorial
    ═══════════════════════════════════════════════ */
-:root {
+  /* Base Colors */
   --black: #000000;
   --white: #ffffff;
   --gray-50: #fafafa;
@@ -28,7 +28,32 @@
   --global-hue: 70; /* Default roughly lime */
   --theme-accent: hsl(var(--global-hue), 80%, 65%);
 
+  /* DARK THEME (DEFAULT) */
+  --bg-primary: var(--black);
+  --text-primary: var(--white);
+  --bg-card: rgba(8, 8, 8, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-focus: hsla(var(--global-hue), 80%, 65%, 0.45);
+  --border-muted: var(--gray-900);
+  --text-muted: var(--gray-400);
+  --scroll-track: var(--black);
+  --nav-bg: rgba(0, 0, 0, 0.9);
+
   color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  --bg-primary: var(--gray-50);
+  --text-primary: var(--gray-950);
+  --bg-card: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-border-focus: hsla(var(--global-hue), 80%, 45%, 0.45);
+  --border-muted: var(--gray-300);
+  --text-muted: var(--gray-600);
+  --scroll-track: var(--gray-200);
+  --nav-bg: rgba(255, 255, 255, 0.9);
+  --theme-accent: hsl(var(--global-hue), 80%, 45%);
+  color-scheme: light;
 }
 
 /* ═══════════════════════════════════════════════
@@ -45,13 +70,13 @@ html {
 }
 
 html {
-  background-color: #000000;
+  background-color: var(--bg-primary);
 }
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #000000;
-  color: var(--white);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -65,7 +90,7 @@ body {
   width: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--black);
+  background: var(--scroll-track);
 }
 ::-webkit-scrollbar-thumb {
   background: var(--gray-700);
@@ -152,8 +177,8 @@ body {
 .glass-card {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01)),
-    rgba(8, 8, 8, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+    var(--bg-card);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   box-shadow: 
@@ -195,7 +220,7 @@ body {
 }
 
 .glass-card:focus-within {
-  border-color: hsla(var(--global-hue), 80%, 65%, 0.45);
+  border-color: var(--theme-accent);
   box-shadow: 
     0 24px 40px -24px rgba(0, 0, 0, 0.85),
     0 0 0 1px hsla(var(--global-hue), 80%, 65%, 0.12),
@@ -203,8 +228,8 @@ body {
 }
 
 .glass {
-  background: rgba(10, 10, 10, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
@@ -244,7 +269,7 @@ body {
    ═══════════════════════════════════════════════ */
 .divider {
   height: 1px;
-  background: var(--gray-800);
+  background: var(--border-muted);
   width: 100%;
 }
 
@@ -282,8 +307,8 @@ body {
    CARD (Projects)
    ═══════════════════════════════════════════════ */
 .project-card {
-  background: rgba(10, 10, 10, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: 12px;
@@ -297,7 +322,7 @@ body {
    ═══════════════════════════════════════════════ */
 .skill-item {
   padding: 1rem 0;
-  border-bottom: 1px solid var(--gray-900);
+  border-bottom: 1px solid var(--border-muted);
   display: flex;
   align-items: center;
   justify-content: space-between;

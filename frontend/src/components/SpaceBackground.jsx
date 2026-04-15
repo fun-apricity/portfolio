@@ -2,6 +2,7 @@ import React, { useRef, useMemo, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Stars, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
+import { useTheme } from '../context/ThemeContext';
 
 const PLANET_COUNT = 7;
 const Y_DEPTH = -40; // Camera travels down along Y axis through the sections
@@ -65,6 +66,7 @@ const RealisticPlanet = ({ id, color, isMoon, scale, speed }) => {
 const FlightController = () => {
   const { camera } = useThree();
   const lightRef = useRef();
+  const { theme } = useTheme();
 
   useFrame(() => {
     const scrollTop = window.scrollY || document.documentElement.scrollTop;
@@ -88,14 +90,16 @@ const FlightController = () => {
 
   return (
     <>
-      <pointLight ref={lightRef} intensity={4} color="#ffffff" distance={20} decay={2} />
+      <pointLight ref={lightRef} intensity={theme === 'light' ? 5 : 4} color="#ffffff" distance={20} decay={2} />
       {/* Subtle ambient light so the dark side of planets aren't pitch black */}
-      <ambientLight intensity={0.05} />
+      <ambientLight intensity={theme === 'light' ? 0.5 : 0.05} />
     </>
   );
 };
 
 const SpaceBackground = () => {
+  const { theme } = useTheme();
+
   // Pre-generate the planetary variations
   const planets = useMemo(() => {
     const data = [];
@@ -123,7 +127,7 @@ const SpaceBackground = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, background: '#020202' }}>
+    <div className="fixed inset-0 pointer-events-none transition-colors duration-1000" style={{ zIndex: 0, background: theme === 'light' ? '#e2e8f0' : '#020202' }}>
       <Canvas
         camera={{ position: [0, 0, 8], fov: 60 }}
         dpr={[1, 1.5]}
@@ -141,8 +145,8 @@ const SpaceBackground = () => {
         <Stars 
           radius={50} 
           depth={50} 
-          count={3500} 
-          factor={4} 
+          count={theme === 'light' ? 800 : 3500} 
+          factor={theme === 'light' ? 2 : 4} 
           saturation={0} 
           fade 
           speed={0.5} 

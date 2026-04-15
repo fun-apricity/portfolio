@@ -1,6 +1,7 @@
 import { motion, useScroll, useSpring, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { personalInfo } from "../data/content";
+import ThemeToggle from "./ThemeToggle";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -47,7 +48,11 @@ const Navbar = () => {
     <>
       <motion.div className="scroll-progress" style={{ scaleX, transformOrigin: "0%" }} />
       <nav 
-        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 border-b ${scrolled || isOpen ? 'bg-black/90 backdrop-blur-md py-4 border-gray-900' : 'bg-transparent py-8 border-transparent'}`}
+        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 border-b ${scrolled || isOpen ? 'backdrop-blur-md py-4' : 'bg-transparent py-8 border-transparent'}`}
+        style={{
+          backgroundColor: (scrolled || isOpen) ? 'var(--nav-bg)' : 'transparent',
+          borderColor: (scrolled || isOpen) ? 'var(--border-muted)' : 'transparent'
+        }}
       >
         <div className="container-narrow flex justify-between items-center relative z-[101]">
           <div className="font-sans font-bold tracking-tighter text-xl uppercase">
@@ -61,6 +66,7 @@ const Navbar = () => {
             <a href="#about" className="link-hover">About</a>
             <a href="#resume" className="link-hover">Resume</a>
             <a href="#contact" className="link-hover">Contact</a>
+            <ThemeToggle />
           </div>
 
           {/* Mobile Toggle Button */}
@@ -91,13 +97,14 @@ const Navbar = () => {
               initial={{ opacity: 0, x: "100%" }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center pt-20"
+              className="fixed inset-0 z-[100] flex flex-col items-center justify-center pt-20 transition-colors duration-500"
+              style={{ backgroundColor: 'var(--bg-primary)' }}
             >
               {/* Background gradient hint */}
               <div className="absolute inset-0 bg-radial-gradient from-theme-accent/10 to-transparent pointer-events-none" />
               
               <nav className="flex flex-col items-center gap-10">
+                <ThemeToggle />
                 {['Work', 'Skills', 'About', 'Resume', 'Contact'].map((item, i) => (
                   <motion.a
                     key={item}
@@ -105,8 +112,8 @@ const Navbar = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1 + 0.2 }}
-                    onClick={() => setIsOpen(false)}
-                    className="text-4xl font-bold tracking-tighter uppercase hover:text-theme-accent transition-colors"
+                    className="text-4xl font-bold tracking-tighter uppercase transition-colors"
+                    style={{ color: 'var(--text-primary)' }}
                   >
                     {item}
                   </motion.a>
@@ -117,10 +124,11 @@ const Navbar = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
-                className="absolute bottom-12 flex flex-col items-center gap-4 text-gray-500 font-mono text-[10px] tracking-[0.2em] uppercase"
+                className="absolute bottom-12 flex flex-col items-center gap-4 font-mono text-[10px] tracking-[0.2em] uppercase"
+                style={{ color: 'var(--text-muted)' }}
               >
                 <span>Available for new projects</span>
-                <div className="w-12 h-px bg-gray-800" />
+                <div className="w-12 h-px" style={{ backgroundColor: 'var(--border-muted)' }} />
               </motion.div>
             </motion.div>
           )}

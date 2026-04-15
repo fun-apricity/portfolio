@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
 
 /* ─── Context & Utils ───────────────────────── */
 import { CursorProvider } from "./context/CursorContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import CustomCursor from "./components/CustomCursor";
 import SpaceBackground from "./components/SpaceBackground";
 
@@ -59,8 +60,9 @@ function App() {
   }, [loading]);
 
   return (
-    <CursorProvider>
-      <div className="relative bg-black min-h-screen cursor-fine-none">
+    <ThemeProvider>
+      <CursorProvider>
+        <div className="relative min-h-screen cursor-fine-none transition-colors duration-500" style={{ backgroundColor: 'var(--bg-primary)' }}>
         <CustomCursor />
         
         {/* Scroll Progress Indicator */}
@@ -100,6 +102,7 @@ function App() {
         )}
       </div>
     </CursorProvider>
+  </ThemeProvider>
   );
 }
 
