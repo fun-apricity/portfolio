@@ -105,13 +105,13 @@ const SpaceBackground = () => {
     const data = [];
     // Tint realistic textures to create diverse looking planets
     const colors = [
-      '#ffffff', // Earth-like
-      '#ffcc88', // Venus-like/Desert
-      '#ff5555', // Mars-like
-      '#88ffcc', // Ice giant
-      '#aa88ff', // Alien gas
+      '#ffffff', // Earth normal
+      '#e0e0e0', // Slightly darker earth
+      '#f5f5f5', // Bright earth
+      '#cccccc', // Desaturated
+      '#ffffff', // Standard
       '#ffffff', // Moon
-      '#ffaa55'  // Jupiter-like
+      '#eaeaea'  // Dusty
     ];
     
     for (let i = 0; i < PLANET_COUNT; i++) {

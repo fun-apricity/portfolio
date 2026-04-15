@@ -122,12 +122,22 @@ const Hero = () => {
       <motion.div className="container-narrow flex flex-col items-center relative w-full mt-10" style={{ zIndex: 10, y: parallaxY }}>
         <div className="relative">
           {isDragging && (
-            <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible z-[-2]">
-              <motion.line x1="50%" y1="50%" x2={lineX2} y2={lineY2} stroke="var(--theme-accent)" strokeWidth="2" strokeDasharray="4 4" />
-              <motion.text x={textX} y={textY} fill="#a3a3a3" fontSize="10" fontFamily="monospace" textAnchor="middle">
+            <>
+              <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible z-[-2]">
+                <motion.line x1="50%" y1="50%" x2={lineX2} y2={lineY2} stroke="var(--theme-accent)" strokeWidth="2" strokeDasharray="4 4" />
+              </svg>
+              <motion.div
+                className="absolute left-1/2 top-1/2 pointer-events-none text-gray-400 text-[10px] font-mono whitespace-nowrap"
+                style={{
+                  x: useTransform(x, v => v/2),
+                  y: useTransform(y, v => v/2 - 20),
+                  translateX: "-50%",
+                  translateY: "-50%"
+                }}
+              >
                 X: {coordX} Y: {coordY}
-              </motion.text>
-            </svg>
+              </motion.div>
+            </>
           )}
 
           {/* Draggable name */}
