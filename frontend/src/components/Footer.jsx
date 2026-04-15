@@ -12,9 +12,9 @@ const Footer = () => {
         </div>
 
         <div className="flex gap-6">
-          <a href={personalInfo.socials?.github || "#"} target="_blank" rel="noopener noreferrer" className="mono-label text-gray-500 hover:text-white transition-colors cursor-none">GitHub</a>
-          <a href={personalInfo.socials?.linkedin || "#"} target="_blank" rel="noopener noreferrer" className="mono-label text-gray-500 hover:text-white transition-colors cursor-none">LinkedIn</a>
-          <a href={personalInfo.socials?.leetcode || "#"} target="_blank" rel="noopener noreferrer" className="mono-label text-gray-500 hover:text-white transition-colors cursor-none">LeetCode</a>
+          <a href={personalInfo.socials?.github || "#"} target="_blank" rel="noopener noreferrer" className="mono-label text-gray-500 hover:text-white transition-colors cursor-fine-none">GitHub</a>
+          <a href={personalInfo.socials?.linkedin || "#"} target="_blank" rel="noopener noreferrer" className="mono-label text-gray-500 hover:text-white transition-colors cursor-fine-none">LinkedIn</a>
+          <a href={personalInfo.socials?.leetcode || "#"} target="_blank" rel="noopener noreferrer" className="mono-label text-gray-500 hover:text-white transition-colors cursor-fine-none">LeetCode</a>
         </div>
 
         <div>

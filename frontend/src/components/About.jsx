@@ -53,11 +53,14 @@ const About = () => {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.4 }}
-            className="text-gray-400 leading-relaxed font-light mb-6"
+            className="text-lg md:text-base text-gray-400 leading-relaxed font-light mb-8"
           >
             {personalInfo.about}
           </motion.p>
-          <a href={personalInfo.resumeUrl} className="link-hover">Download Resume ↗</a>
+          <a href={personalInfo.resumeUrl} className="glass inline-flex items-center gap-3 px-8 py-4 rounded-full font-sans font-bold text-[15px] md:text-sm uppercase tracking-widest text-white hover:text-black hover:bg-white hover:border-white transition-all duration-300">
+            Download Resume 
+            <span className="text-xl">↗</span>
+          </a>
         </div>
         
         <div className="col-span-12 md:col-span-7 md:col-start-6">

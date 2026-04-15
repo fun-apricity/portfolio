@@ -4,8 +4,9 @@ import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
 
 /* ─── Context & Utils ───────────────────────── */
 import { CursorProvider } from "./context/CursorContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import CustomCursor from "./components/CustomCursor";
-import ParticleBackground from "./components/ParticleBackground";
+import SpaceBackground from "./components/SpaceBackground";
 
 /* ─── Components ─────────────────────────────── */
 import Loader from "./components/Loader";
@@ -16,6 +17,7 @@ import Skills from "./components/Skills";
 import Journey from "./components/Journey";
 import Learning from "./components/Learning";
 import Projects from "./components/Projects";
+import Resume from "./components/Resume";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import ThemeEngine from "./components/ThemeEngine";
@@ -58,8 +60,9 @@ function App() {
   }, [loading]);
 
   return (
-    <CursorProvider>
-      <div className="relative bg-black min-h-screen cursor-none">
+    <ThemeProvider>
+      <CursorProvider>
+        <div className="relative min-h-screen cursor-fine-none transition-colors duration-500" style={{ backgroundColor: 'var(--bg-primary)' }}>
         <CustomCursor />
         
         {/* Scroll Progress Indicator */}
@@ -69,7 +72,7 @@ function App() {
         />
 
         {/* Main animated background */}
-        <ParticleBackground />
+        <SpaceBackground />
 
         {/* Loading screen */}
         <AnimatePresence mode="wait">
@@ -89,6 +92,7 @@ function App() {
                 <Skills />
                 <Journey />
                 <Learning />
+                <Resume />
                 <Projects />
                 <Contact />
               </ThemeEngine>
@@ -98,6 +102,7 @@ function App() {
         )}
       </div>
     </CursorProvider>
+  </ThemeProvider>
   );
 }
 

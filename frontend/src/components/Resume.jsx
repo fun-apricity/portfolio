@@ -6,20 +6,7 @@ import { HiDocumentDownload } from "react-icons/hi";
 const Resume = () => {
   return (
     <SectionWrapper id="resume">
-      <div className="text-center">
-        <h2 className="section-heading">
-          My <span className="gradient-text">Resume</span>
-        </h2>
-        <div
-          className="w-20 h-1 rounded-full mx-auto mt-4 mb-6"
-          style={{ background: "linear-gradient(90deg, var(--neon-cyan), var(--neon-purple))" }}
-        />
-        <p
-          className="text-sm max-w-lg mx-auto mb-10"
-          style={{ color: "var(--text-muted)" }}
-        >
-          Get a detailed overview of my experience and qualifications
-        </p>
+      <div className="text-center py-10">
 
         <motion.a
           href={personalInfo.resumeUrl}

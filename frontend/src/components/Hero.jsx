@@ -33,7 +33,7 @@ function MagneticButton({ children, href }) {
       style={{ x: springX, y: springY, backgroundColor: 'var(--theme-accent)' }}
       whileHover={{ scale: 1.05, boxShadow: "0 0 30px var(--theme-accent)" }}
       whileTap={{ scale: 0.95 }}
-      className="border border-white/20 text-black font-mono font-bold text-xs uppercase tracking-widest px-6 py-3 rounded-full inline-flex items-center gap-3 cursor-none transition-shadow duration-300 glass"
+      className="border border-white/20 text-black font-mono font-bold text-xs uppercase tracking-widest px-6 py-3 rounded-full inline-flex items-center gap-3 cursor-fine-none transition-shadow duration-300 glass"
     >
       <span className="text-lg">✦</span> {children}
     </motion.a>
@@ -45,26 +45,43 @@ const Hero = () => {
   
   const x = useMotionValue(0);
   const y = useMotionValue(0);
+  const heroParallaxX = useMotionValue(0);
+  const heroParallaxY = useMotionValue(0);
+  const heroParallaxSpringX = useSpring(heroParallaxX, { stiffness: 80, damping: 25, mass: 0.8 });
+  const heroParallaxSpringY = useSpring(heroParallaxY, { stiffness: 80, damping: 25, mass: 0.8 });
   const [isDragging, setIsDragging] = useState(false);
   const [coordX, setCoordX] = useState(0);
   const [coordY, setCoordY] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const dragBound = windowWidth < 768 ? windowWidth * 0.2 : 200;
 
   // Scroll Parallax math
   const { scrollYProgress } = useScroll();
   const parallaxY = useTransform(scrollYProgress, [0, 1], [0, 600]); // Moves down slowly as user scrolls down
 
-  // Subtle parallax on mouse move for hero text
-  const [mouseXY, setMouseXY] = useState({ x: 0, y: 0 });
+  // Use motion values here so pointer movement does not re-render the full hero.
   useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) {
+      return undefined;
+    }
+
     const handler = (e) => {
-      setMouseXY({
-        x: (e.clientX / window.innerWidth - 0.5) * 12,
-        y: (e.clientY / window.innerHeight - 0.5) * 8,
-      });
+      heroParallaxX.set((e.clientX / window.innerWidth - 0.5) * 12);
+      heroParallaxY.set((e.clientY / window.innerHeight - 0.5) * 8);
     };
+
     window.addEventListener("mousemove", handler);
-    return () => window.removeEventListener("mousemove", handler);
-  }, []);
+    return () => {
+      window.removeEventListener("mousemove", handler);
+    };
+  }, [heroParallaxX, heroParallaxY]);
 
   useMotionValueEvent(x, "change", (latest) => setCoordX(Math.round(latest)));
   useMotionValueEvent(y, "change", (latest) => setCoordY(Math.round(latest)));
@@ -97,22 +114,30 @@ const Hero = () => {
 
       {/* Subtle parallax hint layer — not touching stacking context */}
       <motion.div
-        animate={{ x: mouseXY.x * 0.3, y: mouseXY.y * 0.3 }}
-        transition={{ type: "spring", stiffness: 80, damping: 25 }}
         className="absolute inset-0 pointer-events-none"
-        style={{ zIndex: 1 }}
+        style={{ zIndex: 1, x: heroParallaxSpringX, y: heroParallaxSpringY }}
       />
 
       {/* Parallax Container */}
       <motion.div className="container-narrow flex flex-col items-center relative w-full mt-10" style={{ zIndex: 10, y: parallaxY }}>
         <div className="relative">
           {isDragging && (
-            <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible z-[-2]">
-              <motion.line x1="50%" y1="50%" x2={lineX2} y2={lineY2} stroke="var(--theme-accent)" strokeWidth="2" strokeDasharray="4 4" />
-              <motion.text x={textX} y={textY} fill="#a3a3a3" fontSize="10" fontFamily="monospace" textAnchor="middle">
+            <>
+              <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible z-[-2]">
+                <motion.line x1="50%" y1="50%" x2={lineX2} y2={lineY2} stroke="var(--theme-accent)" strokeWidth="2" strokeDasharray="4 4" />
+              </svg>
+              <motion.div
+                className="absolute left-1/2 top-1/2 pointer-events-none text-gray-400 text-[10px] font-mono whitespace-nowrap"
+                style={{
+                  x: useTransform(x, v => v/2),
+                  y: useTransform(y, v => v/2 - 20),
+                  translateX: "-50%",
+                  translateY: "-50%"
+                }}
+              >
                 X: {coordX} Y: {coordY}
-              </motion.text>
-            </svg>
+              </motion.div>
+            </>
           )}
 
           {/* Draggable name */}
@@ -123,7 +148,7 @@ const Hero = () => {
             transition={{ duration: 0.8 }}
             style={{ x, y }}
             drag
-            dragConstraints={{ left: -200, right: 200, top: -200, bottom: 200 }}
+            dragConstraints={{ left: -dragBound, right: dragBound, top: -dragBound, bottom: dragBound }}
             dragElastic={0.4}
             dragSnapToOrigin={true}
             whileDrag={{ scale: 1.05, zIndex: 50 }}
@@ -137,7 +162,7 @@ const Hero = () => {
                 className="tracking-tighter selection:bg-transparent"
                 style={{
                   color: '#ffffff',
-                  fontSize: 'clamp(3.5rem, 15vw, 14rem)',
+                  fontSize: 'clamp(3rem, 12vw, 14rem)',
                   lineHeight: 1,
                   fontWeight: 900,
                   fontFamily: 'inherit',
@@ -149,7 +174,7 @@ const Hero = () => {
             <div className="flex justify-center w-full mt-[-2%] pointer-events-none relative" style={{ zIndex: -1 }}>
               <h1
                 className="text-massive-outline tracking-tighter selection:bg-transparent"
-                style={{ fontSize: 'clamp(3.5rem, 15vw, 14rem)', lineHeight: 1 }}
+                style={{ fontSize: 'clamp(3rem, 12vw, 14rem)', lineHeight: 1 }}
               >
                 <TextReveal text={lastName} delay={0.4} />
               </h1>
@@ -164,7 +189,7 @@ const Hero = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 1 }}
         >
-          <p className="text-base md:text-2xl text-gray-400 font-light tracking-wide">
+          <p className="text-xl md:text-2xl text-gray-400 font-light tracking-wide">
             {personalInfo.role}.<br/>Solving complex problems with code.
           </p>
         </motion.div>
@@ -183,7 +208,7 @@ const Hero = () => {
         <MagneticButton href="#work">View Work</MagneticButton>
         <a
           href="#contact"
-          className="mono-label text-gray-500 hover:text-theme-accent transition-colors cursor-none"
+          className="mono-label text-gray-500 hover:text-theme-accent transition-colors cursor-fine-none"
           onMouseEnter={() => hoverEnter("CONTACT")}
           onMouseLeave={() => hoverLeave()}
         >

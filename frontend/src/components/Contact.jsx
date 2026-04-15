@@ -2,7 +2,7 @@ import { motion, useMotionValue, useSpring } from "framer-motion";
 import { useState, useRef } from "react";
 import { personalInfo } from "../data/content";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "https://portfolio-ylsl.onrender.com/api";
 
 // Magnetic button
 function MagneticSubmit({ children, disabled }) {
@@ -30,7 +30,7 @@ function MagneticSubmit({ children, disabled }) {
       style={{ x: springX, y: springY, backgroundColor: 'var(--theme-accent)' }}
       whileHover={{ scale: 1.05, boxShadow: "0 0 30px var(--theme-accent)" }}
       whileTap={{ scale: 0.95 }}
-      className="self-start border border-white/20 text-black font-mono font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition-shadow duration-300 disabled:opacity-40 cursor-none glass"
+      className="self-start border border-white/20 text-black font-mono font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition-shadow duration-300 disabled:opacity-40 cursor-fine-none glass"
     >
       {children}
     </motion.button>
@@ -84,8 +84,8 @@ const Contact = () => {
             
             {/* Social links row */}
             <div className="flex gap-6 pt-4">
-              <a href="#" className="glass px-4 py-2 rounded-full mono-label text-gray-400 hover:text-theme-accent hover:border-theme-accent/30 transition-all">GitHub ↗</a>
-              <a href="#" className="glass px-4 py-2 rounded-full mono-label text-gray-400 hover:text-theme-accent hover:border-theme-accent/30 transition-all">LinkedIn ↗</a>
+              <a href={personalInfo.socials?.github || "#"} target="_blank" rel="noopener noreferrer" className="glass px-4 py-2 rounded-full mono-label text-gray-400 hover:text-theme-accent hover:border-theme-accent/30 transition-all">GitHub ↗</a>
+              <a href={personalInfo.socials?.linkedin || "#"} target="_blank" rel="noopener noreferrer" className="glass px-4 py-2 rounded-full mono-label text-gray-400 hover:text-theme-accent hover:border-theme-accent/30 transition-all">LinkedIn ↗</a>
             </div>
           </div>
         </div>

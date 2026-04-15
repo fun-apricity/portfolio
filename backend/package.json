@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "Backend API for portfolio contact form with email delivery",
   "type": "module",
-  "main": "server.js",
+  "main": "index.js",
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "node index.js",
     "dev": "node --watch server.js"
   },
   "dependencies": {
