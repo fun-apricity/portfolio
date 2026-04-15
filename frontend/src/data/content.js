@@ -12,7 +12,7 @@ export const personalInfo = {
   the full stack — from crafting pixel-perfect UIs to designing efficient backend systems.
   When I'm not coding, you'll find me exploring new technologies, contributing to open-source,
   or sharpening my problem-solving skills on coding platforms.`,
-  resumeUrl: "https://your-resume-link.com",
+  resumeUrl: "/resume.pdf", // TODO: Place your resume.pdf inside frontend/public folder
   email: "abhaykant1030206@gmail.com",
   socials: {
     github: "https://github.com/fun-apricity",

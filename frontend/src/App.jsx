@@ -16,6 +16,7 @@ import Skills from "./components/Skills";
 import Journey from "./components/Journey";
 import Learning from "./components/Learning";
 import Projects from "./components/Projects";
+import Resume from "./components/Resume";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import ThemeEngine from "./components/ThemeEngine";
@@ -89,6 +90,7 @@ function App() {
                 <Skills />
                 <Journey />
                 <Learning />
+                <Resume />
                 <Projects />
                 <Contact />
               </ThemeEngine>

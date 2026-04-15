@@ -59,6 +59,7 @@ const Navbar = () => {
             <a href="#work" className="link-hover">Work</a>
             <a href="#skills" className="link-hover">Skills</a>
             <a href="#about" className="link-hover">About</a>
+            <a href="#resume" className="link-hover">Resume</a>
             <a href="#contact" className="link-hover">Contact</a>
           </div>
 
@@ -97,7 +98,7 @@ const Navbar = () => {
               <div className="absolute inset-0 bg-radial-gradient from-theme-accent/10 to-transparent pointer-events-none" />
               
               <nav className="flex flex-col items-center gap-10">
-                {['Work', 'Skills', 'About', 'Contact'].map((item, i) => (
+                {['Work', 'Skills', 'About', 'Resume', 'Contact'].map((item, i) => (
                   <motion.a
                     key={item}
                     href={`#${item.toLowerCase()}`}
